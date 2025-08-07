@@ -1,16 +1,17 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, X, Bot, User } from "lucide-react";
+import { useRef, useEffect, useCallback, memo } from "react";
+import { Send, X, Bot, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@/hooks/use-chat";
-import { validateMessage } from "@/lib/chat-validation";
+import { useMessageValidation } from "@/hooks/use-message-validation";
+import MessageBubble from "@/components/ui/message-bubble";
 
 interface ChatInterfaceProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
+const ChatInterface = memo(function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
   const {
     messages,
     isTyping,
@@ -19,7 +20,15 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
     messagesEndRef,
   } = useChat();
   
-  const [inputValue, setInputValue] = useState("");
+  const {
+    currentMessage,
+    liveValidation,
+    updateMessage,
+    clearMessage,
+    validateFinal,
+    canSubmit
+  } = useMessageValidation();
+  
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -28,24 +37,23 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
     }
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!inputValue.trim() || isLoading) return;
+    if (!canSubmit || isLoading) return;
     
-    const validation = validateMessage(inputValue);
-    if (!validation.isValid) return;
-    
-    sendMessage(inputValue);
-    setInputValue("");
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 500) {
-      setInputValue(value);
+    const validation = validateFinal(currentMessage);
+    if (!validation.isValid) {
+      return;
     }
-  };
+    
+    sendMessage(currentMessage);
+    clearMessage();
+  }, [canSubmit, isLoading, currentMessage, validateFinal, sendMessage, clearMessage]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateMessage(e.target.value);
+  }, [updateMessage]);
 
   if (!isOpen) return null;
 
@@ -79,29 +87,7 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
       {/* Messages Area */}
       <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4 bg-gradient-to-b from-dark-900/50 to-dark-950/50">
         {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`flex items-start gap-3 animate-fade-in ${message.isUser ? 'flex-row-reverse' : ''}`}
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-              message.isUser 
-                ? 'bg-gradient-to-r from-slate-600 to-slate-700' 
-                : 'bg-gradient-to-r from-primary-500 to-violet-500'
-            }`}>
-              {message.isUser ? (
-                <User className="w-4 h-4 text-white" />
-              ) : (
-                <Bot className="w-4 h-4 text-white" />
-              )}
-            </div>
-            <div className={`glass-light rounded-2xl p-3 max-w-xs ${
-              message.isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'
-            }`}>
-              <p className="text-sm text-slate-50 whitespace-pre-wrap">
-                {message.content}
-              </p>
-            </div>
-          </div>
+          <MessageBubble key={message.id} message={message} />
         ))}
         
         {/* Typing Indicator */}
@@ -130,25 +116,39 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder="Digite sua mensagem..."
-              value={inputValue}
+              placeholder="Descreva sua necessidade de negócio..."
+              value={currentMessage}
               onChange={handleInputChange}
-              className="bg-slate-800/50 border-slate-700/50 rounded-xl pr-12 text-slate-50 placeholder-slate-400 focus:ring-primary-500/50 focus:border-primary-500/50"
+              className="bg-slate-800/50 border-slate-700/50 rounded-xl pr-16 text-slate-50 placeholder-slate-400 focus:ring-primary-500/50 focus:border-primary-500/50"
               maxLength={500}
               autoComplete="off"
               aria-label="Campo de mensagem do chat"
               disabled={isLoading}
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-slate-500">
-              {inputValue.length}/500
-            </span>
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+              {liveValidation.warning && (
+                <AlertCircle 
+                  className="w-4 h-4 text-yellow-500" 
+                  title={liveValidation.warning}
+                />
+              )}
+              <span className={`text-xs transition-colors ${
+                liveValidation.charCount > 400 ? 'text-yellow-500' :
+                liveValidation.charCount > 450 ? 'text-orange-500' :
+                liveValidation.charCount >= 500 ? 'text-red-500' :
+                'text-slate-500'
+              }`}>
+                {liveValidation.charCount}/{liveValidation.maxChars}
+              </span>
+            </div>
           </div>
           
           <Button
             type="submit"
-            disabled={!inputValue.trim() || isLoading}
-            className="w-12 h-12 bg-gradient-to-r from-primary-500 to-violet-500 rounded-xl p-0 hover:scale-105 transition-all duration-200 focus:ring-primary-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!canSubmit}
+            className="w-12 h-12 bg-gradient-to-r from-primary-500 to-violet-500 rounded-xl p-0 hover:scale-105 transition-all duration-200 focus:ring-primary-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             aria-label="Enviar mensagem"
+            title={!canSubmit ? liveValidation.warning || "Complete sua mensagem" : "Enviar mensagem"}
           >
             <Send className="w-4 h-4 text-white" />
           </Button>
@@ -156,4 +156,6 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
       </div>
     </div>
   );
-}
+});
+
+export default ChatInterface;

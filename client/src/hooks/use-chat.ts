@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { validateMessage } from "@/lib/chat-validation";
+import { validateMessage, type ValidationResult } from "@/lib/chat-validation";
 import { useToast } from "@/hooks/use-toast";
 import type { Message, ChatResponse, ChatError } from "@/types/chat";
 
@@ -65,9 +65,21 @@ export function useChat() {
     },
     onError: (error) => {
       setIsTyping(false);
+      
+      // Tratamento de erros mais específico
+      let errorMessage = "Ocorreu um erro ao enviar a mensagem. Tente novamente.";
+      
+      if (error.code === "RATE_LIMIT_EXCEEDED") {
+        errorMessage = "Muitas mensagens enviadas. Aguarde um momento antes de tentar novamente.";
+      } else if (error.code === "INVALID_MESSAGE_CONTENT") {
+        errorMessage = error.error || "Mensagem inválida. Verifique o conteúdo.";
+      } else if (error.code === "MESSAGE_TOO_SIMPLE") {
+        errorMessage = error.error || "Por favor, descreva melhor sua necessidade de negócio.";
+      }
+      
       toast({
         title: "Erro na comunicação",
-        description: error.error || "Ocorreu um erro ao enviar a mensagem. Tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -79,7 +91,7 @@ export function useChat() {
     if (!validation.isValid) {
       toast({
         title: "Mensagem inválida",
-        description: validation.error,
+        description: validation.error || "Por favor, verifique sua mensagem",
         variant: "destructive",
       });
       return;

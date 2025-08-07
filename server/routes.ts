@@ -5,58 +5,57 @@ import helmet from "helmet";
 import { z } from "zod";
 import { storage } from "./storage";
 import { chatMessageRequestSchema } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { ChatService } from "./services/chat-service";
+import { AIService } from "./services/ai-service";
+import { InputValidator } from "./services/input-validator";
+import { logger } from "./services/logger";
 
-// Rate limiting for chat messages
+// Dependency Injection - Criação dos serviços
+const chatService = new ChatService(storage);
+const aiService = new AIService();
+const inputValidator = new InputValidator();
+
+// Rate limiting melhorado para chat messages
 const chatRateLimit = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // limit each IP to 10 requests per windowMs
-  message: { error: "Too many chat messages. Please slow down." },
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 15, // máximo 15 requests por minuto por IP
+  message: { 
+    error: "Muitas mensagens enviadas. Aguarde um momento antes de tentar novamente.",
+    code: "RATE_LIMIT_EXCEEDED"
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn("Rate limit exceeded", {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      path: req.path
+    });
+    res.status(429).json({
+      error: "Muitas mensagens enviadas. Aguarde um momento antes de tentar novamente.",
+      code: "RATE_LIMIT_EXCEEDED"
+    });
+  }
+});
+
+// Rate limiting geral para APIs
+const generalRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 100, // máximo 100 requests por minuto por IP
+  message: { 
+    error: "Muitas requisições. Tente novamente em alguns instantes.",
+    code: "GENERAL_RATE_LIMIT_EXCEEDED"
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Input sanitization
-function sanitizeMessage(message: string): string {
-  return message
-    .trim()
-    .replace(/[<>]/g, '')
-    .substring(0, 500);
-}
-
-// Mock AI response generator
-function generateAIResponse(userMessage: string): string {
-  const responses = [
-    "Entendo sua necessidade. Vamos analisar os dados do seu negócio para identificar oportunidades de automação.",
-    "Interessante! Com base no que você compartilhou, posso sugerir algumas estratégias para otimizar seus processos.",
-    "Perfeito! Vou preparar um diagnóstico personalizado para sua situação. Pode me contar mais sobre seus principais desafios?",
-    "Excelente pergunta! Nossa IA pode ajudar a automatizar esse processo e aumentar sua eficiência em até 80%.",
-    "Baseado na sua descrição, identifiquei 3 oportunidades principais de melhoria. Gostaria que eu detalhe cada uma?",
-    "Essa é uma situação comum que vemos em muitos negócios. Nossa solução de automação pode resolver isso de forma eficiente.",
-    "Entendo perfeitamente. Deixe-me analisar seu caso e sugerir as melhores práticas de automação para sua situação.",
-  ];
-  
-  // Simple keyword-based response selection
-  const lowerMessage = userMessage.toLowerCase();
-  
-  if (lowerMessage.includes('vendas') || lowerMessage.includes('vender')) {
-    return "Vendas são cruciais! Nossa IA pode automatizar seu funil de vendas e aumentar suas conversões em até 60%. Que tipo de produtos/serviços você vende?";
-  }
-  
-  if (lowerMessage.includes('cliente') || lowerMessage.includes('atendimento')) {
-    return "O atendimento ao cliente é fundamental! Posso ajudar a implementar chatbots inteligentes que respondem 24/7 e aumentam a satisfação dos clientes.";
-  }
-  
-  if (lowerMessage.includes('processo') || lowerMessage.includes('operação')) {
-    return "Otimização de processos é nossa especialidade! Nossa IA pode mapear seus fluxos atuais e sugerir automações que economizam tempo e recursos.";
-  }
-  
-  return responses[Math.floor(Math.random() * responses.length)];
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Security middleware
+  // Configurar trust proxy para funcionar corretamente com rate limiting
+  app.set('trust proxy', 1);
+  
+  // Security middleware robusto
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
@@ -66,99 +65,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: ["'self'"],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
       },
     },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
+    },
+    noSniff: true,
+    frameguard: { action: 'deny' },
+    xssFilter: true,
   }));
 
-  // Chat message endpoint with rate limiting
+  // Rate limiting geral para todas as rotas da API
+  app.use('/api/', generalRateLimit);
+
+  // Chat message endpoint com validação e serviços SOLID
   app.post("/api/chat/message", chatRateLimit, async (req, res) => {
+    const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     try {
-      // Validate request body
+      logger.info("Chat message request received", {
+        requestId,
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      // Validação de schema com Zod
       const validation = chatMessageRequestSchema.safeParse(req.body);
       if (!validation.success) {
+        logger.warn("Invalid request schema", {
+          requestId,
+          errors: validation.error.issues
+        });
         return res.status(400).json({ 
-          error: "Invalid request", 
-          details: validation.error.issues 
+          error: "Dados da requisição inválidos", 
+          details: validation.error.issues,
+          code: "INVALID_REQUEST_SCHEMA"
         });
       }
 
       const { message, sessionToken } = validation.data;
-      const sanitizedMessage = sanitizeMessage(message);
-
-      if (!sanitizedMessage) {
-        return res.status(400).json({ error: "Message cannot be empty" });
-      }
-
-      // Get or create session
-      let session;
-      if (sessionToken) {
-        session = await storage.getChatSession(sessionToken);
-      }
       
-      if (!session) {
-        const newSessionToken = randomUUID();
-        session = await storage.createChatSession({
-          sessionToken: newSessionToken,
-          userId: null,
+      // Validação e sanitização de entrada
+      const inputValidation = inputValidator.validateMessage(message);
+      if (!inputValidation.isValid) {
+        logger.warn("Message validation failed", {
+          requestId,
+          error: inputValidation.error
+        });
+        return res.status(400).json({ 
+          error: inputValidation.error,
+          code: "INVALID_MESSAGE_CONTENT"
         });
       }
 
-      // Save user message
-      await storage.createChatMessage({
-        sessionId: session.id,
-        content: sanitizedMessage,
-        isUser: true,
-      });
+      const sanitizedMessage = inputValidation.sanitizedMessage!;
 
-      // Generate AI response
-      const aiResponse = generateAIResponse(sanitizedMessage);
+      // Validação adicional de conteúdo de IA
+      if (!aiService.validateMessageContent(sanitizedMessage)) {
+        logger.warn("AI content validation failed", {
+          requestId,
+          messageLength: sanitizedMessage.length
+        });
+        return res.status(400).json({ 
+          error: "Por favor, forneça uma mensagem mais detalhada sobre seu negócio",
+          code: "MESSAGE_TOO_SIMPLE"
+        });
+      }
+
+      // Recuperar ou criar sessão
+      const session = await chatService.getOrCreateSession(sessionToken);
       
-      // Save AI response
-      await storage.createChatMessage({
-        sessionId: session.id,
-        content: aiResponse,
-        isUser: false,
-      });
+      // Buscar histórico para contexto
+      const messageHistory = await chatService.getMessages(session.id);
+      
+      // Salvar mensagem do usuário
+      await chatService.addMessage(session.id, sanitizedMessage, true);
 
-      // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      // Gerar resposta da IA com contexto
+      const aiResponse = await aiService.generateResponse(sanitizedMessage, messageHistory);
+      
+      // Salvar resposta da IA
+      await chatService.addMessage(session.id, aiResponse, false);
+
+      logger.info("Chat message processed successfully", {
+        requestId,
+        sessionId: session.id,
+        messageLength: sanitizedMessage.length,
+        responseLength: aiResponse.length
+      });
 
       res.json({
         reply: aiResponse,
         sessionToken: session.sessionToken,
+        timestamp: new Date().toISOString()
       });
 
     } catch (error) {
-      console.error("Chat error:", error);
+      logger.error("Chat message processing failed", error as Error, {
+        requestId,
+        ip: req.ip
+      });
+      
       res.status(500).json({ 
-        error: "Internal server error. Please try again later." 
+        error: "Erro interno do servidor. Tente novamente em alguns instantes.",
+        code: "INTERNAL_SERVER_ERROR",
+        requestId
       });
     }
   });
 
-  // Get chat history endpoint
+  // Get chat history endpoint com validação aprimorada
   app.get("/api/chat/history/:sessionToken", async (req, res) => {
+    const requestId = `hist-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     try {
       const { sessionToken } = req.params;
       
-      if (!sessionToken) {
-        return res.status(400).json({ error: "Session token is required" });
+      logger.info("Chat history request received", {
+        requestId,
+        sessionToken: sessionToken?.substring(0, 8) + '...', // Log parcial por segurança
+        ip: req.ip
+      });
+      
+      // Validação do token de sessão
+      if (!sessionToken || typeof sessionToken !== 'string' || sessionToken.length < 10) {
+        logger.warn("Invalid session token format", { requestId });
+        return res.status(400).json({ 
+          error: "Token de sessão inválido",
+          code: "INVALID_SESSION_TOKEN"
+        });
       }
 
+      // Validar sessão
+      const isValidSession = await chatService.validateSession(sessionToken);
+      if (!isValidSession) {
+        logger.warn("Session validation failed", { requestId });
+        return res.status(404).json({ 
+          error: "Sessão não encontrada ou expirada",
+          code: "SESSION_NOT_FOUND"
+        });
+      }
+
+      // Buscar sessão
       const session = await storage.getChatSession(sessionToken);
       if (!session) {
-        return res.status(404).json({ error: "Session not found" });
+        return res.status(404).json({ 
+          error: "Sessão não encontrada",
+          code: "SESSION_NOT_FOUND"
+        });
       }
 
-      const messages = await storage.getChatMessages(session.id);
-      res.json({ messages });
+      // Buscar mensagens
+      const messages = await chatService.getMessages(session.id);
+      
+      logger.info("Chat history retrieved successfully", {
+        requestId,
+        sessionId: session.id,
+        messageCount: messages.length
+      });
+
+      res.json({ 
+        messages,
+        sessionInfo: {
+          id: session.id,
+          createdAt: session.createdAt,
+          isActive: session.isActive
+        }
+      });
 
     } catch (error) {
-      console.error("Chat history error:", error);
+      logger.error("Chat history retrieval failed", error as Error, {
+        requestId,
+        ip: req.ip
+      });
+      
       res.status(500).json({ 
-        error: "Failed to retrieve chat history" 
+        error: "Falha ao recuperar histórico de conversas",
+        code: "INTERNAL_SERVER_ERROR",
+        requestId
       });
     }
+  });
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      version: "1.0.0"
+    });
   });
 
   const httpServer = createServer(app);

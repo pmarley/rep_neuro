@@ -16,5 +16,7 @@ export interface ChatHistoryResponse {
 
 export interface ChatError {
   error: string;
+  code?: string;
+  requestId?: string;
   details?: any[];
 }

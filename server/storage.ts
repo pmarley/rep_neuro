@@ -51,8 +51,9 @@ export class MemStorage implements IStorage {
   async createChatSession(insertSession: InsertChatSession): Promise<ChatSession> {
     const id = randomUUID();
     const session: ChatSession = {
-      ...insertSession,
       id,
+      sessionToken: insertSession.sessionToken,
+      userId: insertSession.userId ?? null,
       createdAt: new Date(),
       isActive: true,
     };
