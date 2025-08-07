@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="NeuroBotX – receba um diagnóstico automatizado via chat IA e descubra como escalar seu negócio com automações inteligentes." />
+  <title>NeuroBotX – Diagnóstico IA em Chat</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --gradient-bg: linear-gradient(135deg, #0d1117, #1c1f3a);
+      --card-bg: rgba(30, 37, 56, 0.8);
+      --text: #e0e6ed;
+      --text-secondary: #a0aec0;
+      --accent: #38bdf8;
+      --accent-alt: #a78bfa;
+      --accent-gradient: linear-gradient(45deg, var(--accent), var(--accent-alt));
+      --bg-chat: rgba(19, 24, 35, 0.95);
+      --notification: #ff4757;
+      --rounded: 20px;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--gradient-bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 30%);
+      z-index: -1;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Header */
+    header {
+      padding: 5rem 0 3rem;
+      position: relative;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+      animation-delay: 0.3s;
+    }
+    
+    .logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-bg);
+      border-radius: 50%;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    
+    .logo-icon i {
+      font-size: 2.5rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    header h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    
+    .tagline {
+      font-size: 1.3rem;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 1rem;
+      padding: 1.1rem 2.5rem;
+      background: var(--accent-gradient);
+      color: #fff;
+      border-radius: var(--rounded);
+      font-size: 1.1rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+      border: none;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
+    }
+    
+    .btn i {
+      font-size: 1.2rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+    
+    /* Main Content */
+    main {
+      padding: 2rem 0 5rem;
+    }
+    
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 50px;
+      margin-bottom: 5rem;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+      animation-delay: 0.6s;
+    }
+    
+    .hero-content {
+      flex: 1;
+      text-align: left;
+    }
+    
+    .hero-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-content p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    
+    .hero-illu {
+      flex: 1;
+      position: relative;
+      border-radius: var(--rounded);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      height: 400px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+    .hero-illu:hover {
+      transform: translateY(-10px);
+    }
+    
+    .hero-illu-content {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .hero-illu-content i {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-illu-content h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    
+    .hero-illu-content p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    /* Features */
+    .features-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+      animation-delay: 0.8s;
+    }
+    
+    .features-title h2 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .features-title p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    section.features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 5rem;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+      animation-delay: 1s;
+    }
+    
+    .feature {
+      background: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: var(--rounded);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      border: 1px solid rgba(56, 189, 248, 0.1);
+    }
+    
+    .feature:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56, 189, 248, 0.1);
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+      color: var(--accent);
+    }
+    
+    .feature h3 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+    
+    .feature p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    
+    /* Chat container */
+    #chat-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 400px;
+      height: 600px;
+      background: var(--bg-chat);
+      border-radius: var(--rounded);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    #chat-container.show {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Chat header */
+    #chat-header {
+      background: rgba(30, 37, 56, 0.8);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+    }
+    
+    #chat-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.3rem;
+      user-select: none;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+    
+    #chat-header h2 i {
+      font-size: 1.2rem;
+    }
+    
+    #chat-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent-alt);
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    #chat-close-btn:hover,
+    #chat-close-btn:focus {
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+    }
+    
+    /* Chat toggle button */
+    #chat-toggle {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 70px;
+      height: 70px;
+      background: var(--accent-gradient);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.8rem;
+      cursor: pointer;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      user-select: none;
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+    }
+    
+    #chat-toggle.hide {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.5);
+    }
+    
+    #chat-toggle:hover {
+      transform: scale(1.1) rotate(10deg);
+    }
+    
+    #notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--notification);
+      color: white;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+      display: none;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Messages area */
+    #messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) transparent;
+      display: flex;
+      flex-direction: column;
+      background: rgba(13, 17, 23, 0.5);
+    }
+    
+    #messages::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #messages::-webkit-scrollbar-thumb {
+      background-color: var(--accent);
+      border-radius: 4px;
+    }
+    
+    .msg {
+      margin-bottom: 1.2rem;
+      line-height: 1.5;
+      max-width: 80%;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      word-wrap: break-word;
+      font-size: 1rem;
+      align-self: flex-start;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      user-select: text;
+      animation: fadeInMsg 0.3s ease;
+      position: relative;
+      backdrop-filter: blur(5px);
+    }
+    
+    .msg.bot::before {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 12px;
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-right: 10px solid rgba(56, 189, 248, 0.15);
+    }
+    
+    .msg.user {
+      align-self: flex-end;
+      background: rgba(255, 255, 255, 0.15);
+      color: #e0e6ed;
+      border-bottom-right-radius: 4px;
+      border-bottom-left-radius: 18px;
+    }
+    
+    .msg.user::before {
+      content: '';
+      position: absolute;
+      right: -10px;
+      top: 12px;
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 10px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Form */
+    form {
+      display: flex;
+      border-top: 1px solid rgba(56, 189, 248, 0.1);
+      background: rgba(30, 37, 56, 0.8);
+      padding: 0.8rem;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+    
+    input {
+      flex: 1;
+      padding: 0.9rem 1.2rem;
+      border: none;
+      background: rgba(255, 255, 255, 0.07);
+      color: #e0e6ed;
+      font-size: 1rem;
+      border-radius: 50px;
+      outline-offset: 2px;
+      transition: var(--transition);
+      backdrop-filter: blur(5px);
+    }
+    
+    input:focus {
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    
+    input::placeholder {
+      color: #7b8794;
+    }
+    
+    #submit-btn {
+      padding: 0 1.5rem;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      transition: var(--transition);
+      border-radius: 50px;
+      margin-left: 0.5rem;
+      font-size: 1rem;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
+      font-weight: 600;
+    }
+    
+    #submit-btn:disabled {
+      background: #4a5568;
+      cursor: not-allowed;
+    }
+    
+    #submit-btn:hover:not(:disabled),
+    #submit-btn:focus:not(:disabled) {
+      background: var(--accent-alt);
+      outline: none;
+    }
+    
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 2px solid #fff;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      display: none;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Digitando... */
+    #typing-indicator {
+      font-style: italic;
+      color: var(--accent-alt);
+      margin-bottom: 0.75rem;
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      text-align: left;
+      user-select: none;
+      padding-left: 1rem;
+      display: flex;
+      align-items: center;
+      display: none;
+    }
+    
+    .typing-dots {
+      display: inline-flex;
+      margin-left: 6px;
+    }
+    
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent-alt);
+      border-radius: 50%;
+      margin: 0 3px;
+      opacity: 0.6;
+      animation: typing 1.4s infinite;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+    
+    /* Footer */
+    footer {
+      padding: 3rem 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      user-select: none;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+      animation-delay: 1.2s;
+      border-top: 1px solid rgba(56, 189, 248, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .footer-logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .copyright {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 1.5rem;
+    }
+    
+    .social-links a {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      transition: var(--transition);
+      font-size: 1.2rem;
+    }
+    
+    .social-links a:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-3px);
+    }
+    
+    /* Responsividade */
+    @media (max-width: 1024px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .hero-content {
+        text-align: center;
+      }
+      
+      .hero-illu {
+        width: 100%;
+        max-width: 600px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 3rem 0 2rem;
+      }
+      
+      header h1 {
+        font-size: 2.5rem;
+      }
+      
+      .tagline {
+        font-size: 1.1rem;
+      }
+      
+      .hero-content h2 {
+        font-size: 2rem;
+      }
+      
+      .features-title h2 {
+        font-size: 2.2rem;
+      }
+      
+      .feature {
+        padding: 2rem;
+      }
+      
+      #chat-container {
+        width: 100vw;
+        height: 100dvh;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+      }
+      
+      #chat-toggle {
+        width: 60px;
+        height: 60px;
+        font-size: 1.6rem;
+        right: 20px;
+        bottom: 20px;
+      }
+      
+      form {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.8rem;
+      }
+      
+      input {
+        font-size: 1rem;
+        padding: 0.9rem;
+      }
+      
+      #submit-btn {
+        width: 100%;
+        padding: 0.9rem;
+        font-size: 1rem;
+        margin-left: 0;
+      }
+    }
+    
+    /* Animações */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-brain"></i>
+        </div>
+      </div>
+      <h1>NeuroBotX</h1>
+      <p class="tagline">
+        Transforme seu negócio com diagnósticos inteligentes e automações personalizadas através de nossa tecnologia de IA avançada.
+      </p>
+      <button class="btn" onclick="openChat(event)">
+        <i class="fas fa-comments"></i> Iniciar Diagnóstico
+      </button>
+    </header>
+    
+    <main>
+      <div class="hero">
+        <div class="hero-content">
+          <h2>Soluções Inteligentes para Negócios Modernos</h2>
+          <p>NeuroBotX utiliza inteligência artificial para analisar suas operações de negócio e identificar oportunidades de automação que podem economizar tempo e recursos valiosos.</p>
+          <p>Nosso chatbot interativo conduz você por uma jornada de descoberta, identificando pontos de melhoria e sugerindo soluções personalizadas para escalar suas operações.</p>
+          <button class="btn" onclick="openChat(event)" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(56, 189, 248, 0.3);">
+            <i class="fas fa-rocket"></i> Comece Agora
+          </button>
+        </div>
+        <div class="hero-illu">
+          <div class="hero-illu-content">
+            <i class="fas fa-robot"></i>
+            <h3>Diagnóstico em Tempo Real</h3>
+            <p>Converse com nosso assistente IA e receba insights valiosos para otimizar seu negócio</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="features-title">
+        <h2>Por que escolher o NeuroBotX?</h2>
+        <p>Nossa plataforma oferece soluções inovadoras que transformam a maneira como você gerencia e escala seu negócio</p>
+      </div>
+      
+      <section class="features">
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Diagnóstico Personalizado</h3>
+          <p>Perguntas estratégicas para mapear as dores e sugerir automações inteligentes que impulsionam resultados.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3>Conversação Natural</h3>
+          <p>Interface de chat intuitiva que engaja e conduz o usuário passo a passo pela análise do negócio.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <h3>Plano de Ação Imediato</h3>
+          <p>Ao final do diagnóstico, receba sugestões práticas e implementáveis para otimizar suas operações.</p>
+        </div>
+      </section>
+    </main>
+    
+    <footer>
+      <div class="footer-content">
+        <div class="footer-logo">NeuroBotX</div>
+        <p>Soluções com IA para negócios reais. Transformando desafios em oportunidades.</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+        <div class="copyright">&copy; 2025 NeuroBotX. Todos os direitos reservados.</div>
+      </div>
+    </footer>
+  </div>
+  
+  <button id="chat-toggle" aria-label="Abrir chat" title="Abrir chat" onclick="openChat()">
+    <i class="fas fa-comment-dots"></i>
+    <span id="notification-badge"></span>
+  </button>
+  
+  <div
+    id="chat-container"
+    aria-live="polite"
+    aria-atomic="false"
+    role="region"
+    aria-label="Chatbot NeuroBotX"
+  >
+    <div id="chat-header">
+      <h2><i class="fas fa-brain"></i> NeuroBotX</h2>
+      <button id="chat-close-btn" aria-label="Fechar chat" title="Fechar chat" onclick="closeChat()">✖</button>
+    </div>
+    <div id="messages">
+      <div class="msg bot">👋 Olá! Eu sou o NeuroBotX. Vou ajudar a identificar oportunidades de automação no seu negócio. Qual é o seu maior desafio operacional hoje?</div>
+    </div>
+    <div id="typing-indicator">
+      <span id="typing-text">Digitando</span>
+      <div class="typing-dots">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+    <form id="chat-form" aria-label="Formulário de chat">
+      <input
+        id="chat-input"
+        type="text"
+        placeholder="Digite sua mensagem..."
+        autocomplete="off"
+        required
+        aria-required="true"
+        aria-label="Digite sua mensagem"
+      />
+      <button id="submit-btn" type="submit" aria-label="Enviar mensagem">
+        <span class="spinner" id="submit-spinner"></span>
+        <span id="submit-text">Enviar</span>
+      </button>
+    </form>
+  </div>
+  
+  <script>
+    // Elementos DOM
+    const container = document.getElementById('chat-container');
+    const toggleBtn = document.getElementById('chat-toggle');
+    const msgs = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const notificationBadge = document.getElementById('notification-badge');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const typingText = document.getElementById('typing-text');
+    
+    // Estado da aplicação
+    let isSending = false;
+    let unreadMessages = 0;
+    let isChatOpen = false;
+    let conversationId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    
+    // Inicialização
+    function init() {
+      // Esconder indicadores iniciais
+      typingIndicator.style.display = 'none';
+      notificationBadge.style.display = 'none';
+      
+      // Definir estado inicial do chat
+      isChatOpen = container.classList.contains('show');
+      
+      // Focar no input se o chat estiver aberto
+      if (isChatOpen) {
+        input.focus();
+      }
+      
+      scrollToBottom();
+    }
+    
+    // Sanitizar entrada do usuário
+    function sanitizeInput(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
+    // Funções de controle do chat
+    function openChat(e) {
+      if (e) e.preventDefault();
+      container.classList.add('show');
+      toggleBtn.classList.add('hide');
+      input.focus();
+      scrollToBottom();
+      isChatOpen = true;
+      
+      // Resetar notificações
+      unreadMessages = 0;
+      updateNotificationBadge();
+    }
+    
+    function closeChat() {
+      container.classList.remove('show');
+      toggleBtn.classList.remove('hide');
+      typingIndicator.style.display = 'none';
+      isChatOpen = false;
+    }
+    
+    function appendMessage(content, sender) {
+      const sanitizedContent = sanitizeInput(content);
+      const msg = document.createElement('div');
+      msg.className = `msg ${sender}`;
+      msg.textContent = sanitizedContent;
+      msgs.appendChild(msg);
+      scrollToBottom();
+      
+      // Notificar se for mensagem do bot e o chat estiver fechado
+      if (sender === 'bot' && !isChatOpen) {
+        unreadMessages++;
+        updateNotificationBadge();
+      }
+    }
+    
+    function updateNotificationBadge() {
+      if (unreadMessages > 0) {
+        notificationBadge.textContent = unreadMessages;
+        notificationBadge.style.display = 'flex';
+      } else {
+        notificationBadge.style.display = 'none';
+      }
+    }
+    
+    function scrollToBottom() {
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+    
+    function showTypingIndicator() {
+      typingIndicator.style.display = 'flex';
+      scrollToBottom();
+    }
+    
+    function hideTypingIndicator() {
+      typingIndicator.style.display = 'none';
+    }
+    
+    function toggleSendingState(sending) {
+      isSending = sending;
+      submitBtn.disabled = sending;
+      submitSpinner.style.display = sending ? 'block' : 'none';
+      submitText.textContent = sending ? 'Enviando' : 'Enviar';
+    }
+    
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    } 
+
+    
+    // Função para enviar mensagem para a API
+    async function sendMessageToAI(message) {
+      try {
+        const response = await fetch(
+          'https://truemetrics-n8n-n8n.b5glig.easypanel.host/webhook/neuro-bot-x',
+          {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-Conversation-Id': conversationId
+            },
+            body: JSON.stringify({ message })
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.reply || 'Desculpe, não entendi. Pode reformular?';
+      } catch (error) {
+        console.error('Erro na API:', error);
+        return '⚠️ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.';
+      }
+    }
+    
+    // Evento de envio do formulário
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userMsg = input.value.trim();
+      if (!userMsg || isSending) return;
+      
+      // Configurar estado de envio
+      toggleSendingState(true);
+      
+      // Adicionar mensagem do usuário
+      appendMessage(userMsg, 'user');
+      input.value = '';
+      
+      // Mostrar indicador de digitação
+      showTypingIndicator();
+      
+      try {
+        // Enviar mensagem para a API e aguardar resposta
+        const botReply = await sendMessageToAI(userMsg);
+        
+        hideTypingIndicator();
+        appendMessage(botReply, 'bot');
+      } catch (error) {
+        hideTypingIndicator();
+        appendMessage('⚠️ Ocorreu um erro ao conectar com o serviço de IA.', 'bot');
+        console.error('Erro no chat:', error);
+      } finally {
+        toggleSendingState(false);
+      }
+    });
+    
+    // Inicializar a aplicação
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
