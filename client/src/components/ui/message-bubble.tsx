@@ -28,10 +28,10 @@ const MessageBubble = memo(function MessageBubble({ message }: MessageBubbleProp
       <div className={`glass-light rounded-2xl p-3 max-w-xs ${
         message.isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'
       }`}>
-        <p className="text-sm text-slate-50 whitespace-pre-wrap break-words">
+        <p className="text-sm text-foreground dark:text-slate-50 whitespace-pre-wrap break-words">
           {message.content}
         </p>
-        <div className="text-xs text-slate-400 mt-1 opacity-70">
+        <div className="text-xs text-muted-foreground dark:text-slate-400 mt-1 opacity-70">
           {message.timestamp.toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit'

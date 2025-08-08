@@ -125,10 +125,10 @@ const ChatInterface = memo(function ChatInterface({ isOpen, onClose }: ChatInter
             />
             
             {/* Validation feedback */}
-            {liveValidation.error && (
-              <div className="absolute -bottom-6 left-0 text-xs text-destructive flex items-center gap-1">
+            {liveValidation.warning && (
+              <div className="absolute -bottom-6 left-0 text-xs text-amber-400 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
-                {liveValidation.error}
+                {liveValidation.warning}
               </div>
             )}
           </div>

@@ -66,7 +66,7 @@ export default function Home() {
               className="group inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-primary to-accent rounded-full hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl animate-pulse-button"
               data-testid="button-start-chat"
             >
-              <MessageCircle className="w-6 h-6 group-hover:animate-bounce" />
+              <MessageCircle className="w-6 h-6" />
               Começar Diagnóstico Gratuito
             </button>
             <p className="text-sm text-muted-foreground">
@@ -142,7 +142,7 @@ export default function Home() {
                 { icon: "📱", title: "SaaS", desc: "Melhore retenção", solutions: "Support bots, Analytics IA" }
               ].map((item, i) => (
                 <div key={i} className="text-center p-6 glass rounded-xl hover:scale-105 transition-all duration-300 animate-fade-in-stagger group" style={{animationDelay: `${i * 0.1}s`}}>
-                  <div className="text-3xl mb-3 group-hover:animate-bounce">{item.icon}</div>
+                  <div className="text-3xl mb-3">{item.icon}</div>
                   <div className="font-semibold text-foreground mb-2">{item.title}</div>
                   <div className="text-xs text-muted-foreground mb-2">{item.desc}</div>
                   <div className="text-xs text-accent font-medium">{item.solutions}</div>
