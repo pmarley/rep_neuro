@@ -2,16 +2,16 @@ import type { ChatMessage, ChatSession } from "@shared/schema";
 
 // Interface para serviço de IA (Dependency Inversion Principle)
 export interface IAIService {
-  generateResponse(userMessage: string, context?: ChatMessage[]): Promise<string>;
+  generateResponse(userMessage: string, userId: string, sessionId: string, context?: ChatMessage[], metadata?: any): Promise<string>;
   validateMessageContent(message: string): boolean;
-  getPersonalizedResponse(message: string, userHistory?: ChatMessage[]): Promise<string>;
+  getPersonalizedResponse(message: string, userHistory: ChatMessage[]): Promise<string>;
 }
 
 // Interface para serviço de chat (Dependency Inversion Principle)
 export interface IChatService {
   createSession(userId?: string): Promise<ChatSession>;
-  getOrCreateSession(sessionToken?: string): Promise<ChatSession>;
-  addMessage(sessionId: string, content: string, isUser: boolean): Promise<ChatMessage>;
+  getOrCreateSession(userId: string, sessionToken?: string): Promise<ChatSession>;
+  addMessage(sessionId: string, userId: string, content: string, isUser: boolean): Promise<ChatMessage>;
   getMessages(sessionId: string): Promise<ChatMessage[]>;
   validateSession(sessionToken: string): Promise<boolean>;
 }

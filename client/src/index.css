@@ -6,35 +6,31 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(222, 84%, 5%);
-  --foreground: hsl(210, 40%, 95%);
-  --card: hsl(228, 25%, 15%);
-  --card-foreground: hsl(210, 40%, 95%);
-  --popover: hsl(228, 25%, 15%);
-  --popover-foreground: hsl(210, 40%, 95%);
+  /* Light theme colors */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(222.2, 84%, 4.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(222.2, 84%, 4.9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(222.2, 84%, 4.9%);
   --primary: hsl(200, 89%, 58%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(228, 25%, 20%);
-  --secondary-foreground: hsl(210, 40%, 95%);
-  --muted: hsl(228, 25%, 10%);
-  --muted-foreground: hsl(215, 20%, 65%);
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(222.2, 84%, 4.9%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
   --accent: hsl(258, 90%, 66%);
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(228, 25%, 25%);
-  --input: hsl(228, 25%, 18%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --input: hsl(214.3, 31.8%, 91.4%);
   --ring: hsl(200, 89%, 58%);
-  --chart-1: hsl(200, 89%, 58%);
-  --chart-2: hsl(150, 100%, 30%);
-  --chart-3: hsl(45, 93%, 47%);
-  --chart-4: hsl(120, 75%, 50%);
-  --chart-5: hsl(340, 75%, 55%);
   
-  /* Custom properties for NeuroBotX design */
-  --gradient-bg: linear-gradient(135deg, hsl(222, 84%, 5%), hsl(230, 45%, 15%));
-  --glass-bg: hsla(228, 25%, 15%, 0.7);
-  --glass-border: hsla(210, 40%, 85%, 0.1);
+  /* Custom properties for NeuroBotX design - Light theme */
+  --gradient-bg: linear-gradient(135deg, hsl(210, 40%, 98%), hsl(220, 20%, 95%));
+  --glass-bg: hsla(255, 255%, 255%, 0.7);
+  --glass-border: hsla(210, 40%, 85%, 0.3);
   --accent-gradient: linear-gradient(45deg, hsl(200, 89%, 58%), hsl(258, 90%, 66%));
   --primary-glow: hsla(200, 89%, 58%, 0.25);
   --violet-glow: hsla(258, 90%, 66%, 0.25);
@@ -44,6 +40,7 @@
 }
 
 .dark {
+  /* Dark theme colors */
   --background: hsl(222, 84%, 5%);
   --foreground: hsl(210, 40%, 95%);
   --card: hsl(228, 25%, 15%);
@@ -63,6 +60,11 @@
   --border: hsl(228, 25%, 25%);
   --input: hsl(228, 25%, 18%);
   --ring: hsl(200, 89%, 58%);
+  
+  /* Custom properties for NeuroBotX design - Dark theme */
+  --gradient-bg: linear-gradient(135deg, hsl(222, 84%, 5%), hsl(230, 45%, 15%));
+  --glass-bg: hsla(228, 25%, 15%, 0.7);
+  --glass-border: hsla(210, 40%, 85%, 0.1);
 }
 
 @layer base {

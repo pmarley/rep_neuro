@@ -13,7 +13,7 @@ export class ChatService implements IChatService {
       const sessionToken = randomUUID();
       const sessionData: InsertChatSession = {
         sessionToken,
-        userId: userId || null,
+        userId: userId || `anonymous_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       };
       
       const session = await this.storage.createChatSession(sessionData);
@@ -31,33 +31,21 @@ export class ChatService implements IChatService {
     }
   }
 
-  async getOrCreateSession(sessionToken?: string): Promise<ChatSession> {
+  async getOrCreateSession(userId: string, sessionToken?: string): Promise<ChatSession> {
     try {
-      // Tenta buscar sessão existente
-      if (sessionToken) {
-        const existingSession = await this.storage.getChatSession(sessionToken);
-        if (existingSession && existingSession.isActive) {
-          logger.debug("Retrieved existing chat session", {
-            sessionId: existingSession.id,
-            sessionToken
-          });
-          return existingSession;
-        }
-      }
-      
-      // Cria nova sessão se não encontrou uma válida
-      logger.debug("Creating new chat session", { sessionToken });
-      return await this.createSession();
+      logger.debug("Getting or creating chat session", { userId, sessionToken });
+      return await this.storage.getOrCreateChatSession(userId, sessionToken);
     } catch (error) {
-      logger.error("Failed to get or create chat session", error as Error, { sessionToken });
+      logger.error("Failed to get or create chat session", error as Error, { userId, sessionToken });
       throw new Error("Falha ao recuperar sessão de chat");
     }
   }
 
-  async addMessage(sessionId: string, content: string, isUser: boolean): Promise<ChatMessage> {
+  async addMessage(sessionId: string, userId: string, content: string, isUser: boolean): Promise<ChatMessage> {
     try {
       const messageData: InsertChatMessage = {
         sessionId,
+        userId,
         content,
         isUser,
       };
@@ -67,6 +55,7 @@ export class ChatService implements IChatService {
       logger.info("Chat message added", {
         messageId: message.id,
         sessionId,
+        userId,
         isUser,
         contentLength: content.length
       });

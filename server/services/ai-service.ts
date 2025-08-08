@@ -1,5 +1,5 @@
 import type { IAIService } from "./interfaces";
-import type { ChatMessage } from "@shared/schema";
+import type { ChatMessage, WebhookPayload } from "@shared/schema";
 import { logger } from "./logger";
 
 // Implementação do serviço de IA seguindo Single Responsibility Principle
@@ -17,28 +17,32 @@ export class AIService implements IAIService {
     "Entendo perfeitamente. Deixe-me analisar seu caso e sugerir as melhores práticas de automação para sua situação.",
   ];
 
-  async generateResponse(userMessage: string, context?: ChatMessage[]): Promise<string> {
+  async generateResponse(userMessage: string, userId: string, sessionId: string, context?: ChatMessage[], metadata?: any): Promise<string> {
     try {
       logger.debug("Generating AI response via webhook", {
         messageLength: userMessage.length,
         hasContext: !!context?.length,
+        userId,
+        sessionId,
         webhookUrl: this.webhookUrl
       });
 
-      // Tentar usar o webhook primeiro
-      const webhookResponse = await this.callWebhook(userMessage, context);
+      // Tentar usar o webhook primeiro com payload enriquecido
+      const webhookResponse = await this.callWebhook(userMessage, userId, sessionId, context, metadata);
       if (webhookResponse) {
-        logger.info("Generated response from webhook");
+        logger.info("Generated response from webhook", { userId, sessionId });
         return webhookResponse;
       }
 
       // Fallback para resposta local se webhook falhar
-      logger.warn("Webhook failed, using fallback response");
+      logger.warn("Webhook failed, using fallback response", { userId, sessionId });
       return await this.getFallbackResponse(userMessage, context);
       
     } catch (error) {
       logger.error("Error generating AI response", error as Error, {
-        userMessage: userMessage.substring(0, 50)
+        userMessage: userMessage.substring(0, 50),
+        userId,
+        sessionId
       });
       return "Desculpe, ocorreu um erro ao processar sua mensagem. Pode tentar reformular sua pergunta?";
     }
@@ -64,8 +68,8 @@ export class AIService implements IAIService {
       return "Perfeito! Já mapeamos seus processos na nossa conversa anterior. Agora vamos para a implementação. Sugiro começarmos pela automação do processo mais crítico. Qual é sua prioridade imediata?";
     }
 
-    // Resposta padrão personalizada
-    return await this.generateResponse(message);
+    // Resposta padrão personalizada - usar fallback para evitar recursão
+    return this.getRandomResponse();
   }
 
   validateMessageContent(message: string): boolean {
@@ -80,15 +84,22 @@ export class AIService implements IAIService {
     return hasMinimumContent && !tooSimple;
   }
 
-  private async callWebhook(message: string, context?: ChatMessage[]): Promise<string | null> {
+  private async callWebhook(message: string, userId: string, sessionId: string, context?: ChatMessage[], metadata?: any): Promise<string | null> {
     try {
-      const requestBody = {
+      const webhookPayload: WebhookPayload = {
         message,
-        context: context?.slice(-5), // Últimas 5 mensagens para contexto
+        userId,
+        sessionId,
         timestamp: new Date().toISOString(),
-        sessionInfo: {
-          hasHistory: !!context?.length,
-          messageCount: context?.length || 0
+        conversationHistory: context?.slice(-5).map(msg => ({
+          content: msg.content,
+          isUser: msg.isUser,
+          timestamp: msg.timestamp?.toISOString() || new Date().toISOString()
+        })),
+        metadata: {
+          userAgent: metadata?.userAgent,
+          ip: metadata?.ip,
+          platform: 'NeuroBotX'
         }
       };
 
@@ -104,7 +115,7 @@ export class AIService implements IAIService {
           'Content-Type': 'application/json',
           'User-Agent': 'NeuroBotX/1.0'
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(webhookPayload),
         // Timeout de 30 segundos para evitar travamento
         signal: AbortSignal.timeout(30000)
       });

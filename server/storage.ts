@@ -1,12 +1,10 @@
-import { type User, type InsertUser, type ChatSession, type InsertChatSession, type ChatMessage, type InsertChatMessage } from "@shared/schema";
+import { type ChatSession, type InsertChatSession, type ChatMessage, type InsertChatMessage } from "@shared/schema";
 import { randomUUID } from "crypto";
 
+// Interface simplificada focada apenas em sessões e mensagens
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  
   getChatSession(sessionToken: string): Promise<ChatSession | undefined>;
+  getOrCreateChatSession(userId: string, sessionToken?: string): Promise<ChatSession>;
   createChatSession(session: InsertChatSession): Promise<ChatSession>;
   updateChatSession(sessionToken: string, updates: Partial<ChatSession>): Promise<ChatSession | undefined>;
   
@@ -15,31 +13,12 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
   private chatSessions: Map<string, ChatSession>;
   private chatMessages: Map<string, ChatMessage>;
 
   constructor() {
-    this.users = new Map();
     this.chatSessions = new Map();
     this.chatMessages = new Map();
-  }
-
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
   }
 
   async getChatSession(sessionToken: string): Promise<ChatSession | undefined> {
@@ -48,14 +27,34 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getOrCreateChatSession(userId: string, sessionToken?: string): Promise<ChatSession> {
+    // Se tem sessionToken, tenta encontrar a sessão existente
+    if (sessionToken) {
+      const existingSession = await this.getChatSession(sessionToken);
+      if (existingSession && existingSession.userId === userId) {
+        return existingSession;
+      }
+    }
+
+    // Cria nova sessão
+    const newSessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newSession: InsertChatSession = {
+      userId,
+      sessionToken: newSessionToken,
+      isActive: true,
+    };
+    
+    return await this.createChatSession(newSession);
+  }
+
   async createChatSession(insertSession: InsertChatSession): Promise<ChatSession> {
     const id = randomUUID();
     const session: ChatSession = {
       id,
       sessionToken: insertSession.sessionToken,
-      userId: insertSession.userId ?? null,
+      userId: insertSession.userId,
       createdAt: new Date(),
-      isActive: true,
+      isActive: insertSession.isActive ?? true,
     };
     this.chatSessions.set(id, session);
     return session;

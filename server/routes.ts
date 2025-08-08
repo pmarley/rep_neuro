@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { message, sessionToken } = validation.data;
+      const { message, sessionToken, userId } = validation.data;
       
       // Validação e sanitização de entrada
       const inputValidation = inputValidator.validateMessage(message);
@@ -137,20 +137,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Recuperar ou criar sessão
-      const session = await chatService.getOrCreateSession(sessionToken || undefined);
+      // Recuperar ou criar sessão com userId obrigatório
+      const actualUserId = userId || `anonymous_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const session = await chatService.getOrCreateSession(actualUserId, sessionToken || undefined);
       
       // Buscar histórico para contexto
       const messageHistory = await chatService.getMessages(session.id);
       
       // Salvar mensagem do usuário
-      await chatService.addMessage(session.id, sanitizedMessage, true);
+      await chatService.addMessage(session.id, session.userId, sanitizedMessage, true);
 
-      // Gerar resposta da IA com contexto
-      const aiResponse = await aiService.generateResponse(sanitizedMessage, messageHistory);
+      // Gerar resposta da IA com contexto e metadados enriquecidos
+      const metadata = {
+        userAgent: req.get('User-Agent'),
+        ip: req.ip,
+        requestId
+      };
+      const aiResponse = await aiService.generateResponse(sanitizedMessage, session.userId, session.id, messageHistory, metadata);
       
       // Salvar resposta da IA
-      await chatService.addMessage(session.id, aiResponse, false);
+      await chatService.addMessage(session.id, session.userId, aiResponse, false);
 
       logger.info("Chat message processed successfully", {
         requestId,

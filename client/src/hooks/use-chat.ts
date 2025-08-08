@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { validateMessage, type ValidationResult } from "@/lib/chat-validation";
 import { useToast } from "@/hooks/use-toast";
+import { UserSession } from "@/lib/user-session";
 import type { Message, ChatResponse, ChatError } from "@/types/chat";
 
 export function useChat() {
@@ -37,14 +38,18 @@ export function useChat() {
 
   const sendMessageMutation = useMutation<ChatResponse, ChatError, string>({
     mutationFn: async (message: string) => {
+      const userMetadata = UserSession.getUserMetadata();
       const response = await apiRequest("POST", "/api/chat/message", {
         message,
-        sessionToken,
+        sessionToken: userMetadata.sessionToken,
+        userId: userMetadata.userId,
+        timestamp: userMetadata.timestamp,
       });
       return response.json();
     },
     onSuccess: (data) => {
       setSessionToken(data.sessionToken);
+      UserSession.setSessionToken(data.sessionToken);
 
       // Add bot response
       const botMessage: Message = {
