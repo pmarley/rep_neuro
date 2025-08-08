@@ -25,7 +25,7 @@ The frontend follows a component-based architecture with clear separation betwee
 - **Input Validation**: Zod schemas for request validation and sanitization
 - **Session Management**: Session token-based approach for maintaining chat conversations
 
-The backend uses a modular architecture with separate concerns for routing, storage abstraction, and business logic. Mock AI responses are currently implemented with keyword-based selection for demonstration purposes.
+The backend uses a modular architecture with separate concerns for routing, storage abstraction, and business logic. AI responses are now integrated with a webhook endpoint (https://truemetrics-n8n-n8n.b5glig.easypanel.host/webhook/neuro-bot-x) with fallback to keyword-based responses when the webhook is unavailable.
 
 ## Data Storage Solutions
 - **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
@@ -50,3 +50,10 @@ The data layer uses an interface-based approach allowing for easy swapping betwe
 - **Development Tools**: Replit integration for development environment support
 
 The application is designed to be easily deployable on Replit with built-in development tools and environment configuration. The modular architecture allows for easy extension of AI capabilities and integration with external AI services.
+
+## Recent Changes (August 8, 2025)
+- **Fixed session token validation**: Updated schema to properly handle null session tokens for new chat sessions
+- **Integrated webhook endpoint**: AI service now calls external webhook (https://truemetrics-n8n-n8n.b5glig.easypanel.host/webhook/neuro-bot-x) for responses
+- **Enhanced error handling**: Added robust fallback mechanism when webhook is unavailable
+- **Improved logging**: Added detailed webhook call logging and error tracking
+- **Security enhancements**: Added timeout protection and proper error handling for external API calls

@@ -42,7 +42,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
 
 export const chatMessageRequestSchema = z.object({
   message: z.string().min(1).max(500),
-  sessionToken: z.string().optional(),
+  sessionToken: z.string().nullable().optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

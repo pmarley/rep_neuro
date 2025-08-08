@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Recuperar ou criar sessão
-      const session = await chatService.getOrCreateSession(sessionToken);
+      const session = await chatService.getOrCreateSession(sessionToken || undefined);
       
       // Buscar histórico para contexto
       const messageHistory = await chatService.getMessages(session.id);

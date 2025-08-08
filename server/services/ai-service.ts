@@ -4,7 +4,10 @@ import { logger } from "./logger";
 
 // Implementação do serviço de IA seguindo Single Responsibility Principle
 export class AIService implements IAIService {
-  private readonly responses = [
+  private readonly webhookUrl = "https://truemetrics-n8n-n8n.b5glig.easypanel.host/webhook/neuro-bot-x";
+  
+  // Fallback responses em caso de falha no webhook
+  private readonly fallbackResponses = [
     "Entendo sua necessidade. Vamos analisar os dados do seu negócio para identificar oportunidades de automação.",
     "Interessante! Com base no que você compartilhou, posso sugerir algumas estratégias para otimizar seus processos.",
     "Perfeito! Vou preparar um diagnóstico personalizado para sua situação. Pode me contar mais sobre seus principais desafios?",
@@ -14,45 +17,24 @@ export class AIService implements IAIService {
     "Entendo perfeitamente. Deixe-me analisar seu caso e sugerir as melhores práticas de automação para sua situação.",
   ];
 
-  private readonly keywordResponses = new Map([
-    ['vendas', "Vendas são cruciais! Nossa IA pode automatizar seu funil de vendas e aumentar suas conversões em até 60%. Que tipo de produtos/serviços você vende?"],
-    ['vender', "Vendas são cruciais! Nossa IA pode automatizar seu funil de vendas e aumentar suas conversões em até 60%. Que tipo de produtos/serviços você vende?"],
-    ['cliente', "O atendimento ao cliente é fundamental! Posso ajudar a implementar chatbots inteligentes que respondem 24/7 e aumentam a satisfação dos clientes."],
-    ['atendimento', "O atendimento ao cliente é fundamental! Posso ajudar a implementar chatbots inteligentes que respondem 24/7 e aumentam a satisfação dos clientes."],
-    ['processo', "Otimização de processos é nossa especialidade! Nossa IA pode mapear seus fluxos atuais e sugerir automações que economizam tempo e recursos."],
-    ['operação', "Otimização de processos é nossa especialidade! Nossa IA pode mapear seus fluxos atuais e sugerir automações que economizam tempo e recursos."],
-    ['marketing', "Marketing digital automatizado pode aumentar seu ROI significativamente! Posso sugerir estratégias de automação para campanhas e nutrição de leads."],
-    ['financeiro', "Gestão financeira inteligente é crucial para o crescimento. Nossa IA pode automatizar relatórios, fluxo de caixa e análise de rentabilidade."],
-    ['estoque', "Controle de estoque automatizado evita perdas e otimiza custos. Posso implementar sistemas preditivos para reabastecimento inteligente."],
-    ['produtividade', "Aumento de produtividade é nosso foco principal! Vamos identificar gargalos e implementar soluções que multiplicam sua eficiência operacional."]
-  ]);
-
   async generateResponse(userMessage: string, context?: ChatMessage[]): Promise<string> {
     try {
-      logger.debug("Generating AI response", {
+      logger.debug("Generating AI response via webhook", {
         messageLength: userMessage.length,
-        hasContext: !!context?.length
+        hasContext: !!context?.length,
+        webhookUrl: this.webhookUrl
       });
 
-      // Simula processamento de IA com delay realista
-      await this.simulateProcessingDelay();
-
-      // Gera resposta baseada em contexto se disponível
-      if (context && context.length > 0) {
-        return await this.getPersonalizedResponse(userMessage, context);
+      // Tentar usar o webhook primeiro
+      const webhookResponse = await this.callWebhook(userMessage, context);
+      if (webhookResponse) {
+        logger.info("Generated response from webhook");
+        return webhookResponse;
       }
 
-      // Gera resposta baseada em palavras-chave
-      const keywordResponse = this.getKeywordBasedResponse(userMessage);
-      if (keywordResponse) {
-        logger.info("Generated keyword-based response");
-        return keywordResponse;
-      }
-
-      // Resposta genérica
-      const randomResponse = this.getRandomResponse();
-      logger.info("Generated random response");
-      return randomResponse;
+      // Fallback para resposta local se webhook falhar
+      logger.warn("Webhook failed, using fallback response");
+      return await this.getFallbackResponse(userMessage, context);
       
     } catch (error) {
       logger.error("Error generating AI response", error as Error, {
@@ -98,6 +80,86 @@ export class AIService implements IAIService {
     return hasMinimumContent && !tooSimple;
   }
 
+  private async callWebhook(message: string, context?: ChatMessage[]): Promise<string | null> {
+    try {
+      const requestBody = {
+        message,
+        context: context?.slice(-5), // Últimas 5 mensagens para contexto
+        timestamp: new Date().toISOString(),
+        sessionInfo: {
+          hasHistory: !!context?.length,
+          messageCount: context?.length || 0
+        }
+      };
+
+      logger.debug("Calling webhook", {
+        url: this.webhookUrl,
+        messageLength: message.length,
+        contextLength: context?.length || 0
+      });
+
+      const response = await fetch(this.webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'NeuroBotX/1.0'
+        },
+        body: JSON.stringify(requestBody),
+        // Timeout de 30 segundos para evitar travamento
+        signal: AbortSignal.timeout(30000)
+      });
+
+      if (!response.ok) {
+        logger.warn("Webhook returned error status", {
+          status: response.status,
+          statusText: response.statusText
+        });
+        return null;
+      }
+
+      const data = await response.json();
+      
+      // Validar resposta do webhook
+      if (typeof data === 'string') {
+        return data;
+      } else if (data && typeof data.message === 'string') {
+        return data.message;
+      } else if (data && typeof data.response === 'string') {
+        return data.response;
+      } else if (data && typeof data.reply === 'string') {
+        return data.reply;
+      }
+
+      logger.warn("Webhook returned unexpected format", { data });
+      return null;
+
+    } catch (error) {
+      logger.error("Webhook call failed", error as Error, {
+        webhookUrl: this.webhookUrl
+      });
+      return null;
+    }
+  }
+
+  private async getFallbackResponse(message: string, context?: ChatMessage[]): Promise<string> {
+    // Simula processamento de IA com delay realista
+    await this.simulateProcessingDelay();
+
+    // Gera resposta baseada em contexto se disponível
+    if (context && context.length > 0) {
+      return await this.getPersonalizedResponse(message, context);
+    }
+
+    // Gera resposta baseada em palavras-chave
+    const keywordResponse = this.getKeywordBasedResponse(message);
+    if (keywordResponse) {
+      return keywordResponse;
+    }
+
+    // Resposta genérica
+    return this.getRandomResponse();
+  }
+
   private async simulateProcessingDelay(): Promise<void> {
     // Simula tempo de processamento de IA real (1-3 segundos)
     const delay = 1000 + Math.random() * 2000;
@@ -107,7 +169,21 @@ export class AIService implements IAIService {
   private getKeywordBasedResponse(message: string): string | null {
     const lowerMessage = message.toLowerCase();
     
-    for (const [keyword, response] of Array.from(this.keywordResponses.entries())) {
+    // Mapeamento atualizado de palavras-chave para fallback
+    const keywordMap = new Map([
+      ['vendas', "Vendas são cruciais! Nossa IA pode automatizar seu funil de vendas e aumentar suas conversões em até 60%. Que tipo de produtos/serviços você vende?"],
+      ['vender', "Vendas são cruciais! Nossa IA pode automatizar seu funil de vendas e aumentar suas conversões em até 60%. Que tipo de produtos/serviços você vende?"],
+      ['cliente', "O atendimento ao cliente é fundamental! Posso ajudar a implementar chatbots inteligentes que respondem 24/7 e aumentam a satisfação dos clientes."],
+      ['atendimento', "O atendimento ao cliente é fundamental! Posso ajudar a implementar chatbots inteligentes que respondem 24/7 e aumentam a satisfação dos clientes."],
+      ['processo', "Otimização de processos é nossa especialidade! Nossa IA pode mapear seus fluxos atuais e sugerir automações que economizam tempo e recursos."],
+      ['operação', "Otimização de processos é nossa especialidade! Nossa IA pode mapear seus fluxos atuais e sugerir automações que economizam tempo e recursos."],
+      ['marketing', "Marketing digital automatizado pode aumentar seu ROI significativamente! Posso sugerir estratégias de automação para campanhas e nutrição de leads."],
+      ['financeiro', "Gestão financeira inteligente é crucial para o crescimento. Nossa IA pode automatizar relatórios, fluxo de caixa e análise de rentabilidade."],
+      ['estoque', "Controle de estoque automatizado evita perdas e otimiza custos. Posso implementar sistemas preditivos para reabastecimento inteligente."],
+      ['produtividade', "Aumento de produtividade é nosso foco principal! Vamos identificar gargalos e implementar soluções que multiplicam sua eficiência operacional."]
+    ]);
+    
+    for (const [keyword, response] of Array.from(keywordMap.entries())) {
       if (lowerMessage.includes(keyword)) {
         return response;
       }
@@ -117,7 +193,7 @@ export class AIService implements IAIService {
   }
 
   private getRandomResponse(): string {
-    return this.responses[Math.floor(Math.random() * this.responses.length)];
+    return this.fallbackResponses[Math.floor(Math.random() * this.fallbackResponses.length)];
   }
 
   private extractTopics(messages: ChatMessage[]): string[] {
