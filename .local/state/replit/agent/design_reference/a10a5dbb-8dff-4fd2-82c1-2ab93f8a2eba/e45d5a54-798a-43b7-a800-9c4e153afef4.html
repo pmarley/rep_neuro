@@ -1,0 +1,675 @@
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroBotX - Diagnóstico IA Automatizado</title>
+    <meta name="description" content="NeuroBotX - Receba diagnósticos automatizados via chat IA e descubra como escalar seu negócio com automações inteligentes.">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    'inter': ['Inter', 'sans-serif'],
+                },
+                colors: {
+                    'primary': {
+                        50: '#f0f9ff',
+                        500: '#0ea5e9',
+                        600: '#0284c7',
+                        700: '#0369a1',
+                        900: '#0c4a6e',
+                    },
+                    'violet': {
+                        500: '#8b5cf6',
+                        600: '#7c3aed',
+                    },
+                    'dark': {
+                        800: '#1e293b',
+                        900: '#0f172a',
+                        950: '#020617',
+                    }
+                },
+                animation: {
+                    'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    'slide-in-right': 'slideInRight 0.5s ease-out forwards',
+                    'pulse-gentle': 'pulseGentle 2s ease-in-out infinite',
+                    'typing': 'typing 1s ease-in-out infinite',
+                },
+                keyframes: {
+                    fadeInUp: {
+                        '0%': { opacity: '0', transform: 'translateY(30px)' },
+                        '100%': { opacity: '1', transform: 'translateY(0)' }
+                    },
+                    fadeIn: {
+                        '0%': { opacity: '0' },
+                        '100%': { opacity: '1' }
+                    },
+                    slideInRight: {
+                        '0%': { opacity: '0', transform: 'translateX(30px)' },
+                        '100%': { opacity: '1', transform: 'translateX(0)' }
+                    },
+                    pulseGentle: {
+                        '0%, 100%': { transform: 'scale(1)' },
+                        '50%': { transform: 'scale(1.05)' }
+                    },
+                    typing: {
+                        '0%, 100%': { opacity: '1' },
+                        '50%': { opacity: '0.5' }
+                    }
+                },
+                backdropBlur: {
+                    'xs': '2px',
+                }
+            }
+        }
+    };
+    </script>
+    
+    <style>
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #0ea5e9, #8b5cf6);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #0284c7, #7c3aed);
+        }
+        
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .glass-light {
+            background: rgba(248, 250, 252, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(248, 250, 252, 0.1);
+        }
+
+        /* Hide elements initially for animation */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .animate-on-scroll.animate {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="font-inter bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 text-slate-50 min-h-screen overflow-x-hidden">
+    <!-- Background Effects -->
+    <div class="fixed inset-0 z-0">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-pulse-gentle"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse-gentle" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse-gentle" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- @COMPONENT: Header -->
+    <header class="relative z-10 pt-20 pb-12 text-center animate-on-scroll">
+        <!-- @STATE: isLogoLoaded:boolean = false -->
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="flex justify-center mb-6">
+                <div class="glass w-20 h-20 rounded-full flex items-center justify-center shadow-2xl shadow-primary-500/20 hover:shadow-primary-500/40 transition-all duration-300 hover:scale-110" data-mock="true">
+                    <i class="fas fa-brain text-3xl bg-gradient-to-r from-primary-500 to-violet-500 bg-clip-text text-transparent"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary-500 via-cyan-500 to-violet-500 bg-clip-text text-transparent leading-tight" data-mock="true">
+                NeuroBotX
+            </h1>
+            
+            <p class="text-xl text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed" data-mock="true">
+                Receba diagnósticos automatizados via chat IA e descubra como escalar seu negócio com automações inteligentes de última geração.
+            </p>
+            
+            <button id="cta-button" class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-500 to-violet-500 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/50" 
+                   data-event="click:openChat" 
+                   data-implementation="Should open chat interface and trigger welcome message"
+                   aria-label="Iniciar diagnóstico com IA">
+                <i class="fas fa-comments"></i>
+                <span>Iniciar Diagnóstico IA</span>
+                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform duration-300"></i>
+            </button>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: HeroSection -->
+    <main class="relative z-10 py-16">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <!-- Hero Content -->
+            <section class="grid lg:grid-cols-2 gap-12 items-center mb-24 animate-on-scroll">
+                <div class="lg:order-1" data-mock="true">
+                    <h2 class="text-4xl font-bold mb-6 bg-gradient-to-r from-slate-50 to-slate-300 bg-clip-text text-transparent">
+                        Automação Inteligente para Seu Negócio
+                    </h2>
+                    <p class="text-lg text-slate-400 mb-8 leading-relaxed">
+                        Nossa IA avançada analisa seu negócio em tempo real e fornece insights personalizados para otimizar processos, aumentar vendas e melhorar a experiência do cliente através de automações inteligentes.
+                    </p>
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <div class="flex items-center gap-2 text-emerald-400">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Análise em Tempo Real</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-emerald-400">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Relatórios Automatizados</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-emerald-400">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Integração Simples</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:order-2" data-mock="true">
+                    <div class="glass rounded-3xl p-8 shadow-2xl hover:shadow-primary-500/20 transition-all duration-500 hover:scale-105">
+                        <div class="text-center">
+                            <i class="fas fa-robot text-6xl bg-gradient-to-r from-primary-500 to-violet-500 bg-clip-text text-transparent mb-6"></i>
+                            <h3 class="text-2xl font-bold mb-4">IA Conversacional</h3>
+                            <p class="text-slate-400 leading-relaxed">
+                                Interface intuitiva que compreende linguagem natural e fornece respostas contextualmente relevantes para suas necessidades de negócio.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Features Section -->
+            <section class="animate-on-scroll">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-6 bg-gradient-to-r from-primary-500 to-violet-500 bg-clip-text text-transparent" data-mock="true">
+                        Recursos Avançados
+                    </h2>
+                    <p class="text-xl text-slate-400 max-w-3xl mx-auto" data-mock="true">
+                        Descubra como nossa plataforma pode transformar a eficiência operacional do seu negócio
+                    </p>
+                </div>
+                
+                <!-- @MAP: features.map(feature => ( -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" data-mock="true">
+                    <div class="glass rounded-2xl p-8 hover:shadow-2xl hover:shadow-primary-500/10 transition-all duration-500 hover:scale-105 group">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary-500/20 to-violet-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-chart-line text-2xl text-primary-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-primary-400">Análise de Performance</h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Monitore KPIs em tempo real e receba insights acionáveis para otimizar o desempenho do seu negócio.
+                        </p>
+                    </div>
+                    
+                    <div class="glass rounded-2xl p-8 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-500 hover:scale-105 group">
+                        <div class="w-16 h-16 bg-gradient-to-r from-violet-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-cogs text-2xl text-violet-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-violet-400">Automação de Processos</h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Automatize tarefas repetitivas e libere sua equipe para focar em atividades estratégicas de alto valor.
+                        </p>
+                    </div>
+                    
+                    <div class="glass rounded-2xl p-8 hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-500 hover:scale-105 group">
+                        <div class="w-16 h-16 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-users text-2xl text-cyan-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-cyan-400">Experiência do Cliente</h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Melhore a satisfação do cliente com respostas rápidas e personalizadas 24/7.
+                        </p>
+                    </div>
+                    
+                    <div class="glass rounded-2xl p-8 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 hover:scale-105 group">
+                        <div class="w-16 h-16 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-shield-alt text-2xl text-emerald-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-emerald-400">Segurança Avançada</h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Proteção de dados enterprise com criptografia ponta-a-ponta e compliance total.
+                        </p>
+                    </div>
+                    
+                    <div class="glass rounded-2xl p-8 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500 hover:scale-105 group">
+                        <div class="w-16 h-16 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-rocket text-2xl text-amber-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-amber-400">Escalabilidade</h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Cresça sem limites com nossa infraestrutura cloud nativa que escala automaticamente.
+                        </p>
+                    </div>
+                    
+                    <div class="glass rounded-2xl p-8 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 hover:scale-105 group">
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-brain text-2xl text-purple-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-purple-400">IA Adaptativa</h3>
+                        <p class="text-slate-400 leading-relaxed">
+                            Sistema que aprende continuamente com suas interações para resultados cada vez melhores.
+                        </p>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </section>
+        </div>
+    </main>
+    <!-- @END_COMPONENT: HeroSection -->
+
+    <!-- @COMPONENT: ChatInterface -->
+    <!-- Floating Chat Toggle Button -->
+    <button id="chat-toggle" 
+            class="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-primary-500 to-violet-500 text-white rounded-full shadow-2xl shadow-primary-500/40 hover:shadow-primary-500/60 hover:scale-110 transition-all duration-300 z-50 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-primary-500/50"
+            data-event="click:toggleChat"
+            data-implementation="Toggle chat interface visibility with animation"
+            aria-label="Abrir chat de suporte">
+        <i id="chat-icon" class="fas fa-comments text-xl"></i>
+        <div id="notification-badge" 
+             class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold animate-pulse hidden"
+             data-bind="unreadCount"
+             data-mock="true">
+            1
+        </div>
+    </button>
+
+    <!-- Chat Container -->
+    <div id="chat-container" 
+         class="fixed bottom-6 right-6 w-96 h-[32rem] glass rounded-3xl shadow-2xl shadow-black/50 z-40 flex-col overflow-hidden transform translate-y-8 opacity-0 scale-95 transition-all duration-500 hidden"
+         data-state="closed"
+         aria-hidden="true">
+        
+        <!-- Chat Header -->
+        <div class="glass-light border-b border-slate-700/50 p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-violet-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-robot text-white"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-50" data-mock="true">NeuroBotX Assistant</h3>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        <span class="text-xs text-slate-400" data-mock="true">Online</span>
+                    </div>
+                </div>
+            </div>
+            <button id="chat-close" 
+                    class="w-8 h-8 rounded-full hover:bg-slate-700/50 flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                    data-event="click:closeChat"
+                    aria-label="Fechar chat">
+                <i class="fas fa-times text-slate-400 hover:text-slate-50 transition-colors duration-200"></i>
+            </button>
+        </div>
+
+        <!-- @STATE: messages:Message[] = [] -->
+        <!-- @STATE: isTyping:boolean = false -->
+        <!-- @STATE: inputValue:string = "" -->
+        
+        <!-- Messages Area -->
+        <div id="messages" 
+             class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4 bg-gradient-to-b from-dark-900/50 to-dark-950/50"
+             data-implementation="Should auto-scroll to bottom on new messages"
+             role="log" 
+             aria-live="polite" 
+             aria-label="Histórico de mensagens do chat">
+             
+            <!-- Welcome Message -->
+            <div class="flex items-start gap-3 animate-fade-in" data-mock="true">
+                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="glass-light rounded-2xl rounded-tl-sm p-3 max-w-xs">
+                    <p class="text-sm text-slate-50">
+                        Olá! 👋 Sou o NeuroBotX Assistant. Como posso ajudar você a otimizar seu negócio hoje?
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Typing Indicator (hidden by default) -->
+            <div id="typing-indicator" class="flex items-start gap-3 hidden">
+                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="glass-light rounded-2xl rounded-tl-sm p-3">
+                    <div class="flex items-center gap-1">
+                        <div class="w-2 h-2 bg-slate-400 rounded-full animate-typing"></div>
+                        <div class="w-2 h-2 bg-slate-400 rounded-full animate-typing" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-2 bg-slate-400 rounded-full animate-typing" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="glass-light border-t border-slate-700/50 p-4">
+            <form id="chat-form" 
+                  class="flex items-center gap-3"
+                  data-event="submit:sendMessage"
+                  data-implementation="Should validate input, sanitize content, and send message">
+                
+                <div class="flex-1 relative">
+                    <input id="message-input" 
+                           type="text" 
+                           placeholder="Digite sua mensagem..."
+                           class="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 pr-12 text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all duration-200"
+                           data-bind="inputValue"
+                           data-implementation="Should include input validation and XSS protection"
+                           maxlength="500"
+                           autocomplete="off"
+                           aria-label="Campo de mensagem do chat" />
+                    
+                    <!-- Character Counter -->
+                    <span id="char-counter" 
+                          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-slate-500"
+                          data-bind="inputValue.length"
+                          data-mock="true">
+                        0/500
+                    </span>
+                </div>
+                
+                <button type="submit" 
+                        id="send-button"
+                        class="w-12 h-12 bg-gradient-to-r from-primary-500 to-violet-500 rounded-xl flex items-center justify-center hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        data-implementation="Should be disabled when input is empty or sending"
+                        aria-label="Enviar mensagem">
+                    <i id="send-icon" class="fas fa-paper-plane text-white"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ChatInterface -->
+
+    <!-- @FUNCTIONALITY: This chat interface should implement real-time messaging with proper state management -->
+    
+    <script>
+        (function() {
+            // TODO: Implement proper TypeScript interfaces and type safety
+            // TODO: Add rate limiting for chat interactions
+            // TODO: Implement proper error boundaries and loading states
+            
+            // State Management
+            let state = {
+                chatOpen: false,
+                messages: [],
+                isTyping: false,
+                inputValue: "",
+                unreadCount: 1
+            };
+
+            // DOM Elements
+            const elements = {
+                chatToggle: document.getElementById('chat-toggle'),
+                chatContainer: document.getElementById('chat-container'),
+                chatClose: document.getElementById('chat-close'),
+                chatIcon: document.getElementById('chat-icon'),
+                messagesContainer: document.getElementById('messages'),
+                messageInput: document.getElementById('message-input'),
+                chatForm: document.getElementById('chat-form'),
+                sendButton: document.getElementById('send-button'),
+                sendIcon: document.getElementById('send-icon'),
+                typingIndicator: document.getElementById('typing-indicator'),
+                notificationBadge: document.getElementById('notification-badge'),
+                charCounter: document.getElementById('char-counter'),
+                ctaButton: document.getElementById('cta-button')
+            };
+
+            // Input Validation and Sanitization
+            function sanitizeInput(input) {
+                // TODO: Implement proper XSS protection
+                return input
+                    .trim()
+                    .replace(/[<>]/g, '')
+                    .substring(0, 500);
+            }
+
+            function validateInput(input) {
+                const sanitized = sanitizeInput(input);
+                return {
+                    isValid: sanitized.length > 0 && sanitized.length <= 500,
+                    sanitizedInput: sanitized
+                };
+            }
+
+            // Chat Management
+            function toggleChat() {
+                state.chatOpen = !state.chatOpen;
+                updateChatVisibility();
+                
+                if (state.chatOpen) {
+                    state.unreadCount = 0;
+                    updateNotificationBadge();
+                    elements.messageInput.focus();
+                }
+            }
+
+            function updateChatVisibility() {
+                if (state.chatOpen) {
+                    elements.chatContainer.classList.remove('hidden');
+                    elements.chatContainer.setAttribute('aria-hidden', 'false');
+                    // Trigger animation
+                    requestAnimationFrame(() => {
+                        elements.chatContainer.style.transform = 'translateY(0) scale(1)';
+                        elements.chatContainer.style.opacity = '1';
+                    });
+                    elements.chatIcon.className = 'fas fa-times text-xl';
+                } else {
+                    elements.chatContainer.style.transform = 'translateY(8px) scale(0.95)';
+                    elements.chatContainer.style.opacity = '0';
+                    elements.chatContainer.setAttribute('aria-hidden', 'true');
+                    setTimeout(() => {
+                        elements.chatContainer.classList.add('hidden');
+                    }, 300);
+                    elements.chatIcon.className = 'fas fa-comments text-xl';
+                }
+            }
+
+            function updateNotificationBadge() {
+                if (state.unreadCount > 0 && !state.chatOpen) {
+                    elements.notificationBadge.textContent = state.unreadCount;
+                    elements.notificationBadge.classList.remove('hidden');
+                } else {
+                    elements.notificationBadge.classList.add('hidden');
+                }
+            }
+
+            function createMessage(content, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex items-start gap-3 animate-fade-in ${isUser ? 'flex-row-reverse' : ''}`;
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = `w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    isUser 
+                        ? 'bg-gradient-to-r from-slate-600 to-slate-700' 
+                        : 'bg-gradient-to-r from-primary-500 to-violet-500'
+                }`;
+                
+                const avatarIcon = document.createElement('i');
+                avatarIcon.className = `fas ${isUser ? 'fa-user' : 'fa-robot'} text-white text-sm`;
+                avatarDiv.appendChild(avatarIcon);
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = `glass-light rounded-2xl p-3 max-w-xs ${
+                    isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'
+                }`;
+                
+                const textP = document.createElement('p');
+                textP.className = 'text-sm text-slate-50';
+                textP.textContent = content;
+                contentDiv.appendChild(textP);
+                
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(contentDiv);
+                
+                return messageDiv;
+            }
+
+            function addMessage(content, isUser = false) {
+                const messageElement = createMessage(content, isUser);
+                
+                // Remove typing indicator if it's shown
+                if (!isUser) {
+                    elements.typingIndicator.classList.add('hidden');
+                    state.isTyping = false;
+                }
+                
+                elements.messagesContainer.appendChild(messageElement);
+                elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+                
+                state.messages.push({ content, isUser, timestamp: Date.now() });
+            }
+
+            function showTypingIndicator() {
+                state.isTyping = true;
+                elements.typingIndicator.classList.remove('hidden');
+                elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+            }
+
+            function simulateBotResponse(userMessage) {
+                showTypingIndicator();
+                
+                // TODO: Replace with actual API call to AI service
+                setTimeout(() => {
+                    const responses = [
+                        "Entendo sua necessidade. Vamos analisar os dados do seu negócio para identificar oportunidades de automação.",
+                        "Interessante! Com base no que você compartilhou, posso sugerir algumas estratégias para otimizar seus processos.",
+                        "Perfeito! Vou preparar um diagnóstico personalizado para sua situação. Pode me contar mais sobre seus principais desafios?",
+                        "Excelente pergunta! Nossa IA pode ajudar a automatizar esse processo e aumentar sua eficiência em até 80%.",
+                        "Baseado na sua descrição, identifiquei 3 oportunidades principais de melhoria. Gostaria que eu detalhe cada uma?"
+                    ];
+                    
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage(randomResponse, false);
+                }, 1500 + Math.random() * 1000);
+            }
+
+            function sendMessage(event) {
+                event.preventDefault();
+                
+                const input = elements.messageInput.value;
+                const validation = validateInput(input);
+                
+                if (!validation.isValid) {
+                    // TODO: Show proper error message
+                    return;
+                }
+
+                // Add user message
+                addMessage(validation.sanitizedInput, true);
+                
+                // Clear input
+                elements.messageInput.value = '';
+                updateCharCounter();
+                
+                // Simulate bot response
+                simulateBotResponse(validation.sanitizedInput);
+            }
+
+            function updateCharCounter() {
+                const length = elements.messageInput.value.length;
+                elements.charCounter.textContent = `${length}/500`;
+                
+                if (length > 450) {
+                    elements.charCounter.classList.add('text-amber-400');
+                } else if (length > 480) {
+                    elements.charCounter.classList.remove('text-amber-400');
+                    elements.charCounter.classList.add('text-red-400');
+                } else {
+                    elements.charCounter.classList.remove('text-amber-400', 'text-red-400');
+                    elements.charCounter.classList.add('text-slate-500');
+                }
+            }
+
+            // Scroll Animation Observer
+            function initScrollAnimations() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate');
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: '50px'
+                });
+
+                document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                    observer.observe(el);
+                });
+            }
+
+            // Event Listeners
+            function initEventListeners() {
+                elements.chatToggle.addEventListener('click', toggleChat);
+                elements.chatClose.addEventListener('click', toggleChat);
+                elements.ctaButton.addEventListener('click', toggleChat);
+                elements.chatForm.addEventListener('submit', sendMessage);
+                elements.messageInput.addEventListener('input', updateCharCounter);
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && state.chatOpen) {
+                        toggleChat();
+                    }
+                });
+
+                // Close chat when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (state.chatOpen && 
+                        !elements.chatContainer.contains(e.target) && 
+                        !elements.chatToggle.contains(e.target) &&
+                        !elements.ctaButton.contains(e.target)) {
+                        toggleChat();
+                    }
+                });
+            }
+
+            // Initialize Application
+            function init() {
+                initEventListeners();
+                initScrollAnimations();
+                updateNotificationBadge();
+                updateCharCounter();
+                
+                // Show notification after delay
+                setTimeout(() => {
+                    if (!state.chatOpen) {
+                        state.unreadCount = 1;
+                        updateNotificationBadge();
+                    }
+                }, 3000);
+            }
+
+            // Start the application
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+</html>
