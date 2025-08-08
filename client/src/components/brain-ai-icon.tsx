@@ -7,71 +7,81 @@ export function BrainAIIcon({ className = "w-16 h-16" }: { className?: string })
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="robotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#3B82F6" />
           <stop offset="50%" stopColor="#8B5CF6" />
           <stop offset="100%" stopColor="#06B6D4" />
         </linearGradient>
-        <linearGradient id="neuralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="eyeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#06B6D4" />
+          <stop offset="100%" stopColor="#0EA5E9" />
+        </linearGradient>
+        <linearGradient id="antennaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#F59E0B" />
-          <stop offset="100%" stopColor="#EF4444" />
+          <stop offset="100%" stopColor="#F97316" />
         </linearGradient>
       </defs>
       
-      {/* Cérebro principal */}
-      <path
-        d="M25 45c0-12 8-20 20-20s20 8 20 20c3-5 8-8 14-8 8 0 14 6 14 14 0 4-2 7-4 9 2 3 3 7 3 11 0 10-8 18-18 18-3 0-6-1-8-2-4 6-11 10-19 10-15 0-22-12-22-27z"
-        fill="url(#brainGradient)"
+      {/* Cabeça do Robô */}
+      <rect
+        x="30"
+        y="35"
+        width="40"
+        height="40"
+        rx="12"
+        fill="url(#robotGradient)"
         className="drop-shadow-lg"
       />
       
-      {/* Estruturas neurais internas */}
-      <circle cx="35" cy="40" r="3" fill="url(#neuralGradient)" opacity="0.8" />
-      <circle cx="45" cy="48" r="2.5" fill="url(#neuralGradient)" opacity="0.8" />
-      <circle cx="55" cy="42" r="2" fill="url(#neuralGradient)" opacity="0.8" />
-      <circle cx="65" cy="50" r="2.5" fill="url(#neuralGradient)" opacity="0.8" />
-      <circle cx="40" cy="55" r="2" fill="url(#neuralGradient)" opacity="0.8" />
-      <circle cx="58" cy="58" r="2" fill="url(#neuralGradient)" opacity="0.8" />
+      {/* Antenas */}
+      <g strokeWidth="2" strokeLinecap="round">
+        <line x1="42" y1="35" x2="42" y2="25" stroke="url(#antennaGradient)" />
+        <line x1="58" y1="35" x2="58" y2="22" stroke="url(#antennaGradient)" />
+        <circle cx="42" cy="22" r="2.5" fill="url(#antennaGradient)" className="animate-pulse" />
+        <circle cx="58" cy="19" r="2.5" fill="url(#antennaGradient)" className="animate-pulse" style={{animationDelay: '0.5s'}} />
+      </g>
       
-      {/* Conexões neurais */}
-      <path
-        d="M35 40 L45 48 M45 48 L55 42 M55 42 L65 50 M40 55 L58 58 M45 48 L58 58"
-        stroke="url(#neuralGradient)"
-        strokeWidth="1.5"
-        opacity="0.6"
-        className="animate-pulse"
-      />
+      {/* Olhos */}
+      <g>
+        <circle cx="42" cy="47" r="6" fill="url(#eyeGradient)" className="animate-pulse" />
+        <circle cx="58" cy="47" r="6" fill="url(#eyeGradient)" className="animate-pulse" style={{animationDelay: '0.3s'}} />
+        <circle cx="42" cy="47" r="3" fill="white" />
+        <circle cx="58" cy="47" r="3" fill="white" />
+        <circle cx="43" cy="46" r="1.5" fill="#1f2937" />
+        <circle cx="59" cy="46" r="1.5" fill="#1f2937" />
+      </g>
       
-      {/* Aura de energia IA */}
-      <circle
-        cx="50"
-        cy="50"
-        r="35"
-        fill="none"
-        stroke="url(#brainGradient)"
-        strokeWidth="1"
-        opacity="0.3"
-        className="animate-pulse"
-        style={{ animationDelay: '0.5s' }}
-      />
+      {/* Boca/Alto-falante */}
+      <rect x="45" y="57" width="10" height="4" rx="2" fill="currentColor" opacity="0.6" />
+      <rect x="46" y="58" width="2" height="2" rx="1" fill="url(#eyeGradient)" />
+      <rect x="49" y="58" width="2" height="2" rx="1" fill="url(#eyeGradient)" />
+      <rect x="52" y="58" width="2" height="2" rx="1" fill="url(#eyeGradient)" />
       
-      <circle
-        cx="50"
-        cy="50"
-        r="40"
-        fill="none"
-        stroke="url(#brainGradient)"
-        strokeWidth="0.5"
-        opacity="0.2"
-        className="animate-pulse"
-        style={{ animationDelay: '1s' }}
-      />
+      {/* Corpo */}
+      <rect x="35" y="75" width="30" height="20" rx="6" fill="url(#robotGradient)" opacity="0.8" />
       
-      {/* Pontos de luz representando dados */}
-      <circle cx="20" cy="30" r="1" fill="#3B82F6" className="animate-ping" style={{ animationDelay: '0.2s' }} />
-      <circle cx="80" cy="35" r="1" fill="#8B5CF6" className="animate-ping" style={{ animationDelay: '0.8s' }} />
-      <circle cx="25" cy="70" r="1" fill="#06B6D4" className="animate-ping" style={{ animationDelay: '1.2s' }} />
-      <circle cx="75" cy="70" r="1" fill="#F59E0B" className="animate-ping" style={{ animationDelay: '0.6s' }} />
+      {/* Painel do peito */}
+      <rect x="42" y="80" width="16" height="10" rx="3" fill="currentColor" opacity="0.2" />
+      <circle cx="47" cy="84" r="1.5" fill="url(#eyeGradient)" className="animate-pulse" style={{animationDelay: '1s'}} />
+      <circle cx="53" cy="84" r="1.5" fill="url(#antennaGradient)" className="animate-pulse" style={{animationDelay: '1.5s'}} />
+      
+      {/* Pescoço */}
+      <rect x="47" y="75" width="6" height="6" fill="url(#robotGradient)" />
+      
+      {/* Aura digital */}
+      <circle cx="50" cy="50" r="45" fill="none" stroke="url(#robotGradient)" strokeWidth="0.5" opacity="0.3" className="animate-ping" style={{animationDuration: '3s'}} />
+      
+      {/* Padrão de circuito de fundo */}
+      <g stroke="currentColor" strokeWidth="0.5" opacity="0.1">
+        <path d="M20 25L25 25L25 30" fill="none" />
+        <path d="M75 20L80 20L80 25" fill="none" />
+        <path d="M80 75L75 75L75 80" fill="none" />
+        <path d="M25 80L20 80L20 75" fill="none" />
+        <circle cx="22.5" cy="27.5" r="1" fill="currentColor" />
+        <circle cx="77.5" cy="22.5" r="1" fill="currentColor" />
+        <circle cx="77.5" cy="77.5" r="1" fill="currentColor" />
+        <circle cx="22.5" cy="77.5" r="1" fill="currentColor" />
+      </g>
     </svg>
   );
 }

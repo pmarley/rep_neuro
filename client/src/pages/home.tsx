@@ -31,41 +31,73 @@ export default function Home() {
 
           {/* Título Principal */}
           <h1 className="text-4xl sm:text-6xl font-bold mb-6 gradient-text">
-            Diagnósticos IA
+            Transforme seu Negócio
             <br />
-            para seu Negócio
+            com IA Inteligente
           </h1>
 
           {/* Descrição */}
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Converse com nossa IA especializada em análise de negócios. 
-            Receba recomendações personalizadas para otimizar processos, 
-            aumentar vendas e melhorar a experiência dos clientes.
+            Nosso assistente IA analisa seu negócio em tempo real e oferece 
+            <strong className="text-primary"> soluções personalizadas</strong> para 
+            aumentar vendas, reduzir custos e automatizar processos. 
+            <span className="block mt-2 text-accent font-medium">
+              Resultados comprovados em menos de 30 dias.
+            </span>
           </p>
 
           {/* Botão Principal */}
-          <button
-            onClick={openChat}
-            className="inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-primary to-accent rounded-full hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-            data-testid="button-start-chat"
-          >
-            <MessageCircle className="w-6 h-6" />
-            Iniciar Diagnóstico
-          </button>
+          <div className="flex flex-col items-center gap-4">
+            <button
+              onClick={openChat}
+              className="inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-primary to-accent rounded-full hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+              data-testid="button-start-chat"
+            >
+              <MessageCircle className="w-6 h-6" />
+              Análise Gratuita Agora
+            </button>
+            <p className="text-sm text-muted-foreground">
+              💡 Sem cadastro • ⚡ Resultados em 2 minutos • 🎯 100% personalizado
+            </p>
+          </div>
 
-          {/* Estatísticas Simples */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold gradient-text mb-2">85%</div>
-              <div className="text-sm text-muted-foreground">Melhoria em Processos</div>
+          {/* Resultados e Benefícios */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
+            <div className="text-center p-6 glass rounded-2xl">
+              <div className="text-3xl font-bold gradient-text mb-2">+127%</div>
+              <div className="text-sm text-muted-foreground font-medium">Aumento Médio em Vendas</div>
+              <div className="text-xs text-accent mt-1">Em 30-60 dias</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold gradient-text mb-2">60%</div>
-              <div className="text-sm text-muted-foreground">Aumento em Vendas</div>
+            <div className="text-center p-6 glass rounded-2xl">
+              <div className="text-3xl font-bold gradient-text mb-2">-43%</div>
+              <div className="text-sm text-muted-foreground font-medium">Redução de Custos</div>
+              <div className="text-xs text-accent mt-1">Automação inteligente</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold gradient-text mb-2">24/7</div>
-              <div className="text-sm text-muted-foreground">Suporte Inteligente</div>
+            <div className="text-center p-6 glass rounded-2xl">
+              <div className="text-3xl font-bold gradient-text mb-2">24h</div>
+              <div className="text-sm text-muted-foreground font-medium">Tempo de Implementação</div>
+              <div className="text-xs text-accent mt-1">Plug & play</div>
+            </div>
+          </div>
+
+          {/* Casos de Uso */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-8 gradient-text">
+              Ideal para Seu Tipo de Negócio
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { icon: "🏪", title: "E-commerce", desc: "Otimize conversões" },
+                { icon: "🏥", title: "Serviços", desc: "Automatize agendamentos" },
+                { icon: "🏭", title: "Indústria", desc: "Reduza desperdícios" },
+                { icon: "📱", title: "SaaS", desc: "Melhore retenção" }
+              ].map((item, i) => (
+                <div key={i} className="text-center p-4 glass rounded-xl hover:scale-105 transition-transform">
+                  <div className="text-2xl mb-2">{item.icon}</div>
+                  <div className="font-semibold text-sm text-foreground">{item.title}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
