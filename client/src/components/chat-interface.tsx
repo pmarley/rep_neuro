@@ -119,7 +119,7 @@ const ChatInterface = memo(function ChatInterface({ isOpen, onClose }: ChatInter
               placeholder="Descreva sua necessidade de negócio..."
               value={currentMessage}
               onChange={handleInputChange}
-              className="glass border-border/50 text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary/20 rounded-xl text-sm sm:text-base pr-12"
+              className="glass border-border/50 text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary/20 rounded-xl text-sm sm:text-base"
               disabled={isLoading}
               data-testid="input-chat-message"
             />
